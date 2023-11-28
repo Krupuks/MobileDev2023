@@ -1,0 +1,49 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/loginLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Login Fields -->
+    <EditText
+        android:id="@+id/login_editTextEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:minHeight="48dp"
+        android:hint="Email"
+        android:visibility="visible" />
+
+    <EditText
+        android:id="@+id/login_editTextPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/login_editTextEmail"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="15dp"
+        android:minHeight="48dp"
+        android:hint="Password"
+        android:visibility="visible" />
+
+    <Button
+        android:id="@+id/login_button"
+        android:layout_width="150dp"
+        android:layout_height="75dp"
+        android:layout_below="@id/login_editTextPassword"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:text="Log in"
+        android:visibility="visible" />
+
+    <TextView
+        android:id="@+id/login_textViewToggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/login_button"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:minHeight="48dp"
+        android:onClick="toggleMode"
+        android:text="Don't have an account? Register here."
+        android:visibility="visible" />
+
+</RelativeLayout>

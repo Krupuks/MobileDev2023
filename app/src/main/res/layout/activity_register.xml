@@ -1,0 +1,84 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/registerLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Registration Fields -->
+
+    <EditText
+        android:id="@+id/register_editTextFirstName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="200dp"
+        android:hint="First name"
+        android:minHeight="48dp"
+        android:visibility="visible" />
+
+    <EditText
+        android:id="@+id/register_editTextLastName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/register_editTextFirstName"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="15dp"
+        android:minHeight="48dp"
+        android:hint="Last name"
+        android:visibility="visible" />
+
+    <EditText
+        android:id="@+id/register_editTextEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/register_editTextLastName"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="15dp"
+        android:minHeight="48dp"
+        android:hint="Email"
+        android:visibility="visible" />
+
+    <EditText
+        android:id="@+id/register_editTextPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/register_editTextEmail"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="15dp"
+        android:minHeight="48dp"
+        android:hint="Password"
+        android:visibility="visible" />
+
+    <EditText
+        android:id="@+id/register_editTextPasswordCheck"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/register_editTextPassword"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="15dp"
+        android:minHeight="48dp"
+        android:hint="Password Check"
+        android:visibility="visible" />
+
+    <!-- Add other registration fields as needed -->
+
+    <Button
+        android:id="@+id/register_button"
+        android:layout_width="150dp"
+        android:layout_height="75dp"
+        android:layout_below="@id/register_editTextPasswordCheck"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="32dp"
+        android:text="Register"
+        android:visibility="visible" />
+
+    <TextView
+        android:id="@+id/register_textViewToggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/register_button"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:minHeight="48dp"
+        android:onClick="toggleMode"
+        android:hint="Already have an account? Log in here."
+        android:visibility="visible" />
+</RelativeLayout>
