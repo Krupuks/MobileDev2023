@@ -52,11 +52,11 @@ class RegisterActivity : AppCompatActivity() {
                         val user = hashMapOf(
                             "first_name" to findViewById<EditText>(R.id.register_editTextFirstName).text.toString().trim(),
                             "last_name" to findViewById<EditText>(R.id.register_editTextLastName).text.toString().trim(),
-                            "pref_best_hand" to "",
-                            "pref_court_position" to "",
-                            "pref_match_type" to "",
-                            "pref_time_to_play" to "",
-                            "stat_matches" to 0
+                            "best_hand" to "",
+                            "court_position" to "",
+                            "match_type" to "",
+                            "time_to_play" to "",
+                            "matches" to 0
                         )
 
                         // Save user details to Firestore
