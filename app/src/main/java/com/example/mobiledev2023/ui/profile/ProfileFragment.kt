@@ -16,6 +16,9 @@ class ProfileFragment : Fragment() {
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
 
+
+    private var previousSelectedTextView: TextView? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -27,7 +30,6 @@ class ProfileFragment : Fragment() {
         val currentUser = auth.currentUser
         val currentUserUID = currentUser?.uid
 
-        Log.d("ProfileFragment", "Current User UID: $currentUserUID")
 
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
 
@@ -54,15 +56,15 @@ class ProfileFragment : Fragment() {
         val bothHandsTextView = view.findViewById<TextView>(R.id.text_both_hands)
 
         leftHandTextView.setOnClickListener {
-            updateBestHand(currentUserUID, "Left")
+            updateBestHand(currentUserUID, "Left", R.id.text_left_hand)
         }
 
         rightHandTextView.setOnClickListener {
-            updateBestHand(currentUserUID, "Right")
+            updateBestHand(currentUserUID, "Right", R.id.text_right_hand)
         }
 
         bothHandsTextView.setOnClickListener {
-            updateBestHand(currentUserUID, "Both")
+            updateBestHand(currentUserUID, "Both", R.id.text_both_hands)
         }
 
         return view
@@ -87,19 +89,29 @@ class ProfileFragment : Fragment() {
 
         // Set background color for the current best hand
         when (bestHand) {
-            "Left" -> leftHandTextView.setBackgroundResource(R.color.purple_200)
-            "Right" -> rightHandTextView.setBackgroundResource(R.color.purple_200)
-            "Both" -> bothHandsTextView.setBackgroundResource(R.color.purple_200)
+            "Left" -> {leftHandTextView.setBackgroundResource(R.color.purple_200)
+                        previousSelectedTextView = leftHandTextView}
+            "Right" -> {rightHandTextView.setBackgroundResource(R.color.purple_200)
+                        previousSelectedTextView = rightHandTextView}
+            "Both" -> {bothHandsTextView.setBackgroundResource(R.color.purple_200)
+                        previousSelectedTextView = bothHandsTextView}
         }
     }
 
-
-    private fun updateBestHand(userId: String?, hand: String) {
+    private fun updateBestHand(userId: String?, hand: String, clickedTextViewId: Int) {
+        // Retrieve the clicked TextView using its ID
+        val selectedTextView = view?.findViewById<TextView>(clickedTextViewId)
+        selectedTextView?.setBackgroundResource(R.color.purple_200)
         if (userId != null) {
             val userRef = db.collection("users").document(userId)
             userRef.update("pref_best_hand", hand)
                 .addOnSuccessListener {
                     Log.d("ProfileFragment", "Best hand updated: $hand")
+
+                    if (previousSelectedTextView != selectedTextView)
+                    {
+                        previousSelectedTextView?.setBackgroundResource(android.R.color.transparent)
+                        previousSelectedTextView = selectedTextView}
                 }
                 .addOnFailureListener { exception ->
                     Log.e("ProfileFragment", "Failed to update best hand", exception)
