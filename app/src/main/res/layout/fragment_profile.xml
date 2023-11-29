@@ -5,16 +5,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+
+    android:padding="15dp"
     tools:context=".ui.profile.ProfileFragment">
 
     <TextView
         android:id="@+id/text_name"
-        android:text="              "
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="15dp"
         android:textSize="40sp"
         android:textStyle="bold"
+        android:textColor="@color/teal_900"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
@@ -25,6 +27,7 @@
         android:orientation="vertical"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        android:background="@drawable/rounded_bg"
         app:layout_constraintTop_toBottomOf="@id/text_name"
         android:padding="15dp">
 
@@ -35,13 +38,15 @@
             android:padding="15dp"
             android:text="Player Preferences"
             android:textSize="20sp"
-            android:textStyle="bold" />
+            android:textColor="@color/teal_900"
+            android:textStyle="bold"/>
 
         <LinearLayout
             android:id="@+id/hands_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:background="@drawable/rounded_bg2"
             android:padding="20dp">
 
             <TextView
@@ -49,6 +54,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Best hand"
+                android:textColor="@color/teal_900"
                 android:textSize="15sp"
                 android:textStyle="bold" />
 
@@ -65,8 +71,10 @@
                     android:layout_weight="1"
                     android:padding="15dp"
                     android:text="Left"
+                    android:textColor="@color/teal_900"
                     android:gravity="center"
-                    android:textSize="15sp" />
+                    android:layout_margin="7.5dp"
+                    android:textSize="15sp"/>
 
                 <TextView
                     android:id="@+id/text_right_hand"
@@ -75,7 +83,9 @@
                     android:layout_weight="1"
                     android:padding="15dp"
                     android:text="Right"
+                    android:textColor="@color/teal_900"
                     android:gravity="center"
+                    android:layout_margin="7.5dp"
                     android:textSize="15sp" />
 
                 <TextView
@@ -85,7 +95,9 @@
                     android:layout_weight="1"
                     android:padding="15dp"
                     android:text="Both"
+                    android:textColor="@color/teal_900"
                     android:gravity="center"
+                    android:layout_margin="7.5dp"
                     android:textSize="15sp" />
 
             </LinearLayout>

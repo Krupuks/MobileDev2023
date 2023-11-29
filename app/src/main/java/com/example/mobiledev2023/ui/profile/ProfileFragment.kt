@@ -89,11 +89,11 @@ class ProfileFragment : Fragment() {
 
         // Set background color for the current best hand
         when (bestHand) {
-            "Left" -> {leftHandTextView.setBackgroundResource(R.color.purple_200)
+            "Left" -> {leftHandTextView.setBackgroundResource(R.drawable.rounded_bg3)
                         previousSelectedTextView = leftHandTextView}
-            "Right" -> {rightHandTextView.setBackgroundResource(R.color.purple_200)
+            "Right" -> {rightHandTextView.setBackgroundResource(R.drawable.rounded_bg3)
                         previousSelectedTextView = rightHandTextView}
-            "Both" -> {bothHandsTextView.setBackgroundResource(R.color.purple_200)
+            "Both" -> {bothHandsTextView.setBackgroundResource(R.drawable.rounded_bg3)
                         previousSelectedTextView = bothHandsTextView}
         }
     }
@@ -101,7 +101,7 @@ class ProfileFragment : Fragment() {
     private fun updateBestHand(userId: String?, hand: String, clickedTextViewId: Int) {
         // Retrieve the clicked TextView using its ID
         val selectedTextView = view?.findViewById<TextView>(clickedTextViewId)
-        selectedTextView?.setBackgroundResource(R.color.purple_200)
+        selectedTextView?.setBackgroundResource(R.drawable.rounded_bg3)
         if (userId != null) {
             val userRef = db.collection("users").document(userId)
             userRef.update("pref_best_hand", hand)
