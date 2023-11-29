@@ -5,9 +5,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.example.mobiledev2023.R
+import com.example.mobiledev2023.presentation.CardBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -15,9 +17,6 @@ class ProfileFragment : Fragment() {
 
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseFirestore
-
-
-    private var previousSelectedTextView: TextView? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -27,95 +26,58 @@ class ProfileFragment : Fragment() {
         auth = FirebaseAuth.getInstance()
         db = FirebaseFirestore.getInstance()
 
-        val currentUser = auth.currentUser
-        val currentUserUID = currentUser?.uid
-
+        val currentUserUID = auth.currentUser?.uid
 
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
+        val profileContainer = view.findViewById<LinearLayout>(R.id.profile_container)
 
+        // Fetch user preferences from Firestore
         if (currentUserUID != null) {
             db.collection("users").document(currentUserUID)
                 .get()
                 .addOnSuccessListener { document ->
                     if (document != null && document.exists()) {
-                        val userData = document.data
-                        displayUserData(view, userData)
-                        // Log success
-                        Log.d("ProfileFragment", "Data retrieval succeeded: $userData")
+                        val userPreferences = document.data?.toMutableMap() ?: mutableMapOf()
+                        // Remove unnecessary data or keys not needed for preferences display
+                        displayUserPreferences(profileContainer, userPreferences, currentUserUID)
+                        Log.d("ProfileFragment", "User preferences retrieved: $userPreferences")
                     }
                 }
                 .addOnFailureListener { exception ->
-                    // Handle failures
-                    // Log failure
-                    Log.e("ProfileFragment", "Data retrieval failed", exception)
+                    Log.e("ProfileFragment", "Failed to retrieve user preferences", exception)
                 }
-        }
-
-        val leftHandTextView = view.findViewById<TextView>(R.id.text_left_hand)
-        val rightHandTextView = view.findViewById<TextView>(R.id.text_right_hand)
-        val bothHandsTextView = view.findViewById<TextView>(R.id.text_both_hands)
-
-        leftHandTextView.setOnClickListener {
-            updateBestHand(currentUserUID, "Left", R.id.text_left_hand)
-        }
-
-        rightHandTextView.setOnClickListener {
-            updateBestHand(currentUserUID, "Right", R.id.text_right_hand)
-        }
-
-        bothHandsTextView.setOnClickListener {
-            updateBestHand(currentUserUID, "Both", R.id.text_both_hands)
         }
 
         return view
     }
 
-    private fun displayUserData(view: View, userData: Map<String, Any>?) {
-        val bestHand = userData?.get("pref_best_hand").toString()
+    private fun displayUserPreferences(
+        profileContainer: LinearLayout,
+        userPreferences: MutableMap<String, Any>,
+        currentUserUID: String
+    ) {
+        val cardBuilder = CardBuilder(requireContext())
 
-        // Show name
-        view.findViewById<TextView>(R.id.text_name)?.text =
-            userData?.get("first_name").toString() + " " + userData?.get("last_name").toString()
+        val tileOptions = mapOf(
+            "Best hand" to listOf("Left", "Right", "Both"),
+            "Court position" to listOf("Forehand", "Backhand", "Both"),
+            "Match type" to listOf("Competitive", "Friendly", "Both")
+        )
 
-        // Show best hand
-        val leftHandTextView = view.findViewById<TextView>(R.id.text_left_hand)
-        val rightHandTextView = view.findViewById<TextView>(R.id.text_right_hand)
-        val bothHandsTextView = view.findViewById<TextView>(R.id.text_both_hands)
+        val dynamicCard = cardBuilder.buildCard(
+            "Player Preferences",
+            tileOptions,
+            currentUserUID,
+            userPreferences
+        )
+        profileContainer.addView(dynamicCard)
 
-        // Reset background color for all hands
-        leftHandTextView.setBackgroundResource(android.R.color.transparent)
-        rightHandTextView.setBackgroundResource(android.R.color.transparent)
-        bothHandsTextView.setBackgroundResource(android.R.color.transparent)
+        // Retrieve first name and last name from userPreferences map
+        val firstName = userPreferences["first_name"] as? String ?: ""
+        val lastName = userPreferences["last_name"] as? String ?: ""
 
-        // Set background color for the current best hand
-        when (bestHand) {
-            "Left" -> {leftHandTextView.setBackgroundResource(R.drawable.rounded_bg3)
-                        previousSelectedTextView = leftHandTextView}
-            "Right" -> {rightHandTextView.setBackgroundResource(R.drawable.rounded_bg3)
-                        previousSelectedTextView = rightHandTextView}
-            "Both" -> {bothHandsTextView.setBackgroundResource(R.drawable.rounded_bg3)
-                        previousSelectedTextView = bothHandsTextView}
-        }
-    }
-
-    private fun updateBestHand(userId: String?, hand: String, clickedTextViewId: Int) {
-        // Retrieve the clicked TextView using its ID
-        val selectedTextView = view?.findViewById<TextView>(clickedTextViewId)
-        selectedTextView?.setBackgroundResource(R.drawable.rounded_bg3)
-        if (userId != null) {
-            val userRef = db.collection("users").document(userId)
-            userRef.update("pref_best_hand", hand)
-                .addOnSuccessListener {
-                    Log.d("ProfileFragment", "Best hand updated: $hand")
-
-                    if (previousSelectedTextView != selectedTextView)
-                    {
-                        previousSelectedTextView?.setBackgroundResource(android.R.color.transparent)
-                        previousSelectedTextView = selectedTextView}
-                }
-                .addOnFailureListener { exception ->
-                    Log.e("ProfileFragment", "Failed to update best hand", exception)
-                }
-        }
+        // Access the TextView in your layout file where you want to display the name
+        val nameTextView = profileContainer.findViewById<TextView>(R.id.text_name)
+        nameTextView.text = "$firstName $lastName"
     }
 }
