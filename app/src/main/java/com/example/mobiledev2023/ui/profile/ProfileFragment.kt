@@ -31,16 +31,16 @@ class ProfileFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
         val profileContainer = view.findViewById<LinearLayout>(R.id.profile_container)
 
-        // Fetch user preferences from Firestore
+        // Fetch user properties from Firestore
         if (currentUserUID != null) {
             db.collection("users").document(currentUserUID)
                 .get()
                 .addOnSuccessListener { document ->
                     if (document != null && document.exists()) {
-                        val userPreferences = document.data?.toMutableMap() ?: mutableMapOf()
+                        val userProperties = document.data?.toMutableMap() ?: mutableMapOf()
                         // Remove unnecessary data or keys not needed for preferences display
-                        displayUserPreferences(profileContainer, userPreferences, currentUserUID)
-                        Log.d("ProfileFragment", "User preferences retrieved: $userPreferences")
+                        displayUserProperties(profileContainer, userProperties, currentUserUID)
+                        Log.d("ProfileFragment", "User preferences retrieved: $userProperties")
                     }
                 }
                 .addOnFailureListener { exception ->
@@ -51,26 +51,12 @@ class ProfileFragment : Fragment() {
         return view
     }
 
-    private fun displayUserPreferences(
+    private fun displayUserProperties(
         profileContainer: LinearLayout,
         userPreferences: MutableMap<String, Any>,
         currentUserUID: String
     ) {
-        val cardBuilder = CardBuilder(requireContext())
-
-        val tileOptions = mapOf(
-            "Best hand" to listOf("Left", "Right", "Both"),
-            "Court position" to listOf("Forehand", "Backhand", "Both"),
-            "Match type" to listOf("Competitive", "Friendly", "Both")
-        )
-
-        val dynamicCard = cardBuilder.buildCard(
-            "Player Preferences",
-            tileOptions,
-            currentUserUID,
-            userPreferences
-        )
-        profileContainer.addView(dynamicCard)
+        //NAME
 
         // Retrieve first name and last name from userPreferences map
         val firstName = userPreferences["first_name"] as? String ?: ""
@@ -79,5 +65,23 @@ class ProfileFragment : Fragment() {
         // Access the TextView in your layout file where you want to display the name
         val nameTextView = profileContainer.findViewById<TextView>(R.id.text_name)
         nameTextView.text = "$firstName $lastName"
+
+
+        //PREFERENCES
+        val tileOptions = mapOf(
+            "Best hand" to listOf("Left", "Right", "Both"),
+            "Court position" to listOf("Forehand", "Backhand", "Both"),
+            "Match type" to listOf("Competitive", "Friendly", "Both"),
+            "Time to play" to listOf("Morning", "Noon", "Evening")
+        )
+        val dynamicCard = CardBuilder(requireContext()).buildCard(
+            "Player Preferences",
+            tileOptions,
+            currentUserUID,
+            userPreferences
+        )
+        profileContainer.addView(dynamicCard)
+
+
     }
 }
