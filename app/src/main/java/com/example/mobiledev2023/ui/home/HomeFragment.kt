@@ -4,39 +4,43 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.fragment.findNavController
 import com.example.mobiledev2023.R
-import com.example.mobiledev2023.databinding.FragmentHomeBinding
+import com.example.mobiledev2023.ui.builders.CourtBookingBuilder
+import com.google.firebase.firestore.FirebaseFirestore
 
 class HomeFragment : Fragment() {
-
-    private var _binding: FragmentHomeBinding? = null
-    private val binding get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        val root: View = binding.root
+    ): View? {
+        val view = inflater.inflate(R.layout.fragment_home, container, false)
+        val constraintLayout = view.findViewById<ConstraintLayout>(R.id.fragment_home_layout)
 
-        // Ensure that bookCourtButton is properly referenced in FragmentHomeBinding
-        val button: Button = binding.bookCourtButton
-        button.setOnClickListener {
-            // Redirect to CourtBookingFragment using the action ID
-            findNavController().navigate(R.id.fragment_court_booking_layout)
-        }
+        // Access a Cloud Firestore instance
+        val db = FirebaseFirestore.getInstance()
 
-        return root
-    }
+        // Access the "courts" collection
+        val cardBuilder = CourtBookingBuilder(requireContext(), db)
+        val dynamicCard = cardBuilder.buildCard2(
+            "Court Booking",
+            requireContext(),
+            view
+        )
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+        val params = ConstraintLayout.LayoutParams(
+            ConstraintLayout.LayoutParams.MATCH_PARENT,
+            ConstraintLayout.LayoutParams.WRAP_CONTENT
+        )
+        dynamicCard.layoutParams = params
+
+        constraintLayout.addView(dynamicCard)
+        // Handle errors while fetching data
+
+
+        return view
     }
 }

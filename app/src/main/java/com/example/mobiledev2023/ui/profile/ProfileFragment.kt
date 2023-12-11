@@ -9,7 +9,7 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import com.example.mobiledev2023.R
-import com.example.mobiledev2023.presentation.CardBuilder
+import com.example.mobiledev2023.ui.builders.PreferenceBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -74,7 +74,7 @@ class ProfileFragment : Fragment() {
             "Match type" to listOf("Competitive", "Friendly", "Both"),
             "Time to play" to listOf("Morning", "Noon", "Evening")
         )
-        val dynamicCard = CardBuilder(requireContext()).buildCard(
+        val dynamicCard = PreferenceBuilder(requireContext()).buildCard(
             "Player Preferences",
             tileOptions,
             currentUserUID,

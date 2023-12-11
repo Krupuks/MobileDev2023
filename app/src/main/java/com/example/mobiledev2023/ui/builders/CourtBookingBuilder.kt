@@ -1,4 +1,4 @@
-package com.example.mobiledev2023.presentation
+package com.example.mobiledev2023.ui.builders
 
 import android.content.Context
 import android.util.Log
@@ -7,10 +7,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
 import androidx.core.content.ContextCompat
+import androidx.navigation.NavOptions
+import androidx.navigation.Navigation.findNavController
 import com.example.mobiledev2023.R
 import com.google.firebase.firestore.FirebaseFirestore
+import java.util.Calendar
 
-class CardBuilder2(private val context: Context, private val db: FirebaseFirestore) {
+class CourtBookingBuilder(private val context: Context, private val db: FirebaseFirestore) {
 
     private var selectedOptionTextView: TextView? = null
     private var selectedCourt: String = ""
@@ -22,7 +25,8 @@ class CardBuilder2(private val context: Context, private val db: FirebaseFiresto
 
     fun buildCard2(
         title: String,
-        context: Context
+        context: Context,
+        fragmentView: View
     ): View {
         val cardLayout = LayoutInflater.from(context).inflate(R.layout.card, null)
         cardContainer = cardLayout.findViewById(R.id.card_container)
@@ -31,6 +35,24 @@ class CardBuilder2(private val context: Context, private val db: FirebaseFiresto
 
         courtSpinner = Spinner(context)
         datePicker = DatePicker(context)
+
+        datePicker.init(
+            datePicker.year,
+            datePicker.month,
+            datePicker.dayOfMonth
+        ) { view, year, monthOfYear, dayOfMonth ->
+            // Fetch time slots for the selected court and the new date
+            fetchTimeSlotsForSelectedCourt(selectedCourt, datePicker) { fetchedTimeSlots ->
+                timeSlots.clear()
+                timeSlots.addAll(fetchedTimeSlots)
+                rebuildUI(fragmentView)
+            }
+        }
+        val calendar = Calendar.getInstance()
+        calendar.add(Calendar.DAY_OF_MONTH, 1) // Set the minimum date to tomorrow
+
+        val minDate = calendar.timeInMillis
+        datePicker.minDate = minDate
 
         var tileOptions = mapOf(
             "Select a Court" to courtSpinner,
@@ -100,10 +122,10 @@ class CardBuilder2(private val context: Context, private val db: FirebaseFiresto
                     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                         selectedCourt = courtSpinner.selectedItem?.toString() ?: ""
 
-                        fetchTimeSlotsForSelectedCourt(selectedCourt) { fetchedTimeSlots ->
+                        fetchTimeSlotsForSelectedCourt(selectedCourt,datePicker) { fetchedTimeSlots ->
                             timeSlots.clear()
                             timeSlots.addAll(fetchedTimeSlots)
-                            rebuildUI()
+                            rebuildUI(fragmentView)
                         }
                     }
 
@@ -115,7 +137,7 @@ class CardBuilder2(private val context: Context, private val db: FirebaseFiresto
         return cardLayout
     }
 
-    private fun rebuildUI() {
+    private fun rebuildUI(fragmentView: View) {
         // Find the view representing the time slots
         val timeSlotsView = cardContainer.findViewWithTag<View>("timeSlotsView")
 
@@ -178,6 +200,16 @@ class CardBuilder2(private val context: Context, private val db: FirebaseFiresto
         newBookButton.setOnClickListener {
             val selectedDate = getSelectedDateFromDatePicker(datePicker)
             bookSelectedTimeSlot(selectedCourt, selectedDate, selectedTime)
+        }// Inside the onCreateView of HomeFragment
+        newBookButton.setOnClickListener {
+            val selectedDate = getSelectedDateFromDatePicker(datePicker)
+            bookSelectedTimeSlot(selectedCourt, selectedDate, selectedTime)
+
+            val navOptions = NavOptions.Builder()
+            .setPopUpTo(R.id.navigation_home, true) // This will clear the back stack up to home
+            .build()
+            // Trigger navigation to the DashboardFragment
+            findNavController(fragmentView).navigate(R.id.action_home_to_dashboard, null, navOptions)
         }
         cardContainer.addView(newBookButton)
     }
@@ -200,20 +232,42 @@ class CardBuilder2(private val context: Context, private val db: FirebaseFiresto
         selectedTime = textView.text.toString()
     }
 
-    private fun fetchTimeSlotsForSelectedCourt(selectedCourtName: String, onTimeSlotsFetched: (List<String>) -> Unit) {
+    private fun fetchTimeSlotsForSelectedCourt(selectedCourtName: String, datePicker: DatePicker, onTimeSlotsFetched: (List<String>) -> Unit) {
+        // Get the selected date from the date picker
+        val selectedDate = getSelectedDateFromDatePicker(datePicker)
+
         db.collection("courts")
             .whereEqualTo("name", selectedCourtName)
             .get()
             .addOnSuccessListener { documents ->
                 val timeSlots = mutableListOf<String>()
 
+                Log.d("SELECTED DATE", selectedDate)
                 for (document in documents) {
-                    val slots = document.get("time_slots") as? List<*>
-                    slots?.forEach { slot ->
-                        val timeSlot = slot as? String
-                        timeSlot?.let { timeSlots.add(it) }
+                    val reservedSlots = document.get("reserved_time_slots") as? List<String>
+                    Log.d("RESERVEDSLOTS", reservedSlots.toString())
+                    val slots = document.get("time_slots") as? List<String>
+                    Log.d("SLOTS", slots.toString())
+
+                    val selectedReservedSlots = mutableListOf<String>()
+                    if (reservedSlots != null) {
+                        for (reservedSlot in reservedSlots) {
+                            if (reservedSlot.startsWith(selectedDate)) {
+                                selectedReservedSlots.add(reservedSlot.split(" ")[1])
+                            }
+                        }
+                    }
+                    Log.d("SELECTED DAYS SLOTS", selectedReservedSlots.toString())
+
+                    // Remove elements that occur in selectedReservedSlots from slots
+                    if (slots != null) {
+                        val mutableSlots = slots.toMutableList()
+                        mutableSlots.removeAll(selectedReservedSlots)
+                        timeSlots.addAll(mutableSlots)
+                        Log.d("AVAILABLE SLOTS", mutableSlots.toString())
                     }
                 }
+
                 onTimeSlotsFetched(timeSlots)
             }
     }

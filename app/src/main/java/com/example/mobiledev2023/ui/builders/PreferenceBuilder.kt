@@ -1,5 +1,5 @@
 // CardBuilder.kt
-package com.example.mobiledev2023.presentation
+package com.example.mobiledev2023.ui.builders
 
 import android.content.Context
 import android.util.TypedValue
@@ -12,7 +12,7 @@ import androidx.core.content.ContextCompat
 import com.example.mobiledev2023.R
 import com.google.firebase.firestore.FirebaseFirestore
 
-class CardBuilder(private val context: Context) {
+class PreferenceBuilder(private val context: Context) {
 
     private var selectedOptionsMap: MutableMap<String, TextView?> = mutableMapOf()
 
