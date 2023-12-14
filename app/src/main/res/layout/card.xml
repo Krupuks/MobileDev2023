@@ -8,8 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="@drawable/rounded_bg"
-        android:layout_margin="15dp">
+        android:background="@drawable/rounded_bg">
 
         <TextView
             android:id="@+id/text_card"

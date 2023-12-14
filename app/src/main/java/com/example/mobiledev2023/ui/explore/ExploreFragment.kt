@@ -1,4 +1,4 @@
-package com.example.mobiledev2023.ui.home
+package com.example.mobiledev2023.ui.explore
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,29 +7,22 @@ import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import com.example.mobiledev2023.R
-import com.example.mobiledev2023.ui.builders.CourtBookingBuilder
+import com.example.mobiledev2023.ui.builders.ShowMatchesBuilder
 import com.google.firebase.firestore.FirebaseFirestore
 
-class HomeFragment : Fragment() {
-
+class ExploreFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_home, container, false)
-        val constraintLayout = view.findViewById<ConstraintLayout>(R.id.fragment_home_layout)
-
-        // Access a Cloud Firestore instance
         val db = FirebaseFirestore.getInstance()
 
-        // Access the "courts" collection
-        val cardBuilder = CourtBookingBuilder(requireContext(), db)
-        val dynamicCard = cardBuilder.buildCard2(
-            "Court Booking",
-            requireContext(),
-            view
-        )
+        val view = inflater.inflate(R.layout.fragment_explore, container, false)
+        val constraintLayout = view.findViewById<ConstraintLayout>(R.id.fragment_explore_layout)
+
+        val cardBuilder = ShowMatchesBuilder(requireContext(), db)
+        val dynamicCard = cardBuilder.buildCard("Available Matches")
 
         val params = ConstraintLayout.LayoutParams(
             ConstraintLayout.LayoutParams.MATCH_PARENT,
@@ -38,8 +31,6 @@ class HomeFragment : Fragment() {
         dynamicCard.layoutParams = params
 
         constraintLayout.addView(dynamicCard)
-        // Handle errors while fetching data
-
 
         return view
     }

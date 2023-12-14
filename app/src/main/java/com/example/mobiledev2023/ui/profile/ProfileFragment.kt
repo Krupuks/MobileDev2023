@@ -15,31 +15,27 @@ import com.google.firebase.firestore.FirebaseFirestore
 
 class ProfileFragment : Fragment() {
 
-    private lateinit var auth: FirebaseAuth
-    private lateinit var db: FirebaseFirestore
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        auth = FirebaseAuth.getInstance()
-        db = FirebaseFirestore.getInstance()
-
-        val currentUserUID = auth.currentUser?.uid
+        val db = FirebaseFirestore.getInstance()
+        val auth = FirebaseAuth.getInstance()
+        val userID = auth.currentUser?.uid
 
         val view = inflater.inflate(R.layout.fragment_profile, container, false)
         val profileContainer = view.findViewById<LinearLayout>(R.id.profile_container)
 
         // Fetch user properties from Firestore
-        if (currentUserUID != null) {
-            db.collection("users").document(currentUserUID)
+        if (userID != null) {
+            db.collection("users").document(userID)
                 .get()
                 .addOnSuccessListener { document ->
                     if (document != null && document.exists()) {
                         val userProperties = document.data?.toMutableMap() ?: mutableMapOf()
                         // Remove unnecessary data or keys not needed for preferences display
-                        displayUserProperties(profileContainer, userProperties, currentUserUID)
+                        displayUserProperties(profileContainer, userProperties, userID)
                         Log.d("ProfileFragment", "User preferences retrieved: $userProperties")
                     }
                 }

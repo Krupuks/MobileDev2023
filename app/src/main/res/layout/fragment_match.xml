@@ -4,9 +4,10 @@
     android:layout_height="match_parent">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/fragment_home_layout"
+        android:id="@+id/fragment_match_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:padding="15dp">
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </ScrollView>
