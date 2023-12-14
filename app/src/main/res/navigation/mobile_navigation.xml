@@ -3,25 +3,37 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_home">
+    app:startDestination="@+id/navigation_explore">
 
     <fragment
-        android:id="@+id/navigation_home"
-        android:name="com.example.mobiledev2023.ui.home.HomeFragment"
-        android:label="@string/title_home"
-        tools:layout="@layout/fragment_home"/>
+        android:id="@+id/navigation_explore"
+        android:name="com.example.mobiledev2023.ui.explore.ExploreFragment"
+        android:label="Explore"
+        tools:layout="@layout/fragment_explore"/>
+    />
+
+    <fragment
+        android:id="@+id/navigation_court"
+        android:name="com.example.mobiledev2023.ui.court.CourtFragment"
+        android:label="@string/title_court"
+        tools:layout="@layout/fragment_court"/>
 
     <action
-        android:id="@+id/action_home_to_dashboard"
-        app:destination="@id/navigation_dashboard" />
+        android:id="@+id/action_court_to_match"
+        app:destination="@id/navigation_match" />
     />
 
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.example.mobiledev2023.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        android:id="@+id/navigation_match"
+        android:name="com.example.mobiledev2023.ui.match.MatchFragment"
+        android:label="@string/title_match"
+        tools:layout="@layout/fragment_match" />
+
+    <action
+        android:id="@+id/action_match_to_court"
+        app:destination="@id/navigation_court" />
+    />
 
     <fragment
         android:id="@+id/navigation_profile"
