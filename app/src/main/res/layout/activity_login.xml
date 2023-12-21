@@ -20,9 +20,10 @@
         android:layout_below="@id/login_editTextEmail"
         android:layout_centerInParent="true"
         android:layout_marginTop="15dp"
-        android:minHeight="48dp"
         android:hint="Password"
-        android:visibility="visible" />
+        android:minHeight="48dp"
+        android:visibility="visible"
+        android:inputType="textPassword" />
 
     <Button
         android:id="@+id/login_button"
@@ -32,7 +33,9 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="32dp"
         android:text="Log in"
-        android:visibility="visible" />
+        android:visibility="visible"
+        android:background="@drawable/rounded_bg3"
+        />
 
     <TextView
         android:id="@+id/login_textViewToggle"
@@ -44,6 +47,6 @@
         android:minHeight="48dp"
         android:onClick="toggleMode"
         android:text="Don't have an account? Register here."
-        android:visibility="visible" />
+        android:visibility="visible"/>
 
 </RelativeLayout>
