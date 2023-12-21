@@ -22,7 +22,7 @@ class ExploreFragment : Fragment() {
         val constraintLayout = view.findViewById<ConstraintLayout>(R.id.fragment_explore_layout)
 
         val cardBuilder = ShowMatchesBuilder(requireContext(), db)
-        val dynamicCard = cardBuilder.buildCard("Available Matches")
+        val dynamicCard = cardBuilder.buildCard("All Matches", false)
 
         val params = ConstraintLayout.LayoutParams(
             ConstraintLayout.LayoutParams.MATCH_PARENT,

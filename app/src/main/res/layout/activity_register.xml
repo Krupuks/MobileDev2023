@@ -68,7 +68,9 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="32dp"
         android:text="Register"
-        android:visibility="visible" />
+        android:visibility="visible"
+        android:background="@drawable/rounded_bg3"
+        />
 
     <TextView
         android:id="@+id/register_textViewToggle"

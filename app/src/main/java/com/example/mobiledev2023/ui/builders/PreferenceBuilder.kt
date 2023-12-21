@@ -26,6 +26,13 @@ class PreferenceBuilder(private val context: Context) {
         val titleTextView = cardLayout.findViewById<TextView>(R.id.text_card)
         titleTextView.text = title
 
+        val layoutParamsCard = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        layoutParamsCard.setMargins(0, 30, 0, 0)
+        cardLayout.layoutParams = layoutParamsCard
+
         val cardContainer = cardLayout.findViewById<LinearLayout>(R.id.card_container)
 
         for ((tileTitle, options) in tileOptions) {

@@ -6,67 +6,109 @@ import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import com.example.mobiledev2023.R
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.tasks.TaskCompletionSource
 import com.google.android.gms.tasks.Tasks
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.DateFormatSymbols
 
+object FirestoreConstants {
+    const val COLLECTION_MATCHES = "matches"
+    const val COLLECTION_RESERVATIONS = "reservations"
+    // ... other constants
+}
+
 data class Match(
-    val reservationID: String,
-    val teamAPlayer1: String,
-    val teamAPlayer2: String,
-    val teamBPlayer1: String,
-    val teamBPlayer2: String
+    var documentID: String, // New property for storing the Firestore document ID
+    var reservationID: String,
+    var teamAPlayer1: String,
+    var teamAPlayer2: String,
+    var teamBPlayer1: String,
+    var teamBPlayer2: String
 )
 
 class ShowMatchesBuilder(private val context: Context, private val db: FirebaseFirestore) {
 
-    fun buildCard(title: String): View {
+    companion object {
+        private const val MARGIN_VALUE = 30
+    }
+
+    fun buildCard(title: String, filteredOnUser: Boolean): View {
+        val auth = FirebaseAuth.getInstance()
+        val userID = auth.currentUser?.uid
         val cardLayout = LayoutInflater.from(context).inflate(R.layout.card, null)
         val titleTextView = cardLayout.findViewById<TextView>(R.id.text_card)
         titleTextView.text = title
+
+        val layoutParamsCard = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        layoutParamsCard.setMargins(0, 30, 0, 0)
+        cardLayout.layoutParams = layoutParamsCard
+
         val cardContainer = cardLayout.findViewById<LinearLayout>(R.id.card_container)
 
         fetchMatchesFromFirestore { matches ->
-            matches.forEach { match ->
-                val matchContainer = LinearLayout(context)
-                matchContainer.orientation = LinearLayout.VERTICAL
+            val filteredMatches = if (filteredOnUser) {
+                matches.filter { match ->
+                    match.teamAPlayer1 == userID ||
+                            match.teamAPlayer2 == userID ||
+                            match.teamBPlayer1 == userID ||
+                            match.teamBPlayer2 == userID
+                }
+            } else {
+                matches
+            }
+            if (filteredMatches.isEmpty()) {
+                val emptyTextView = TextView(context)
+                emptyTextView.text = "Looks a bit empty in here"
+                emptyTextView.textSize = 15f
+                emptyTextView.textAlignment = View.TEXT_ALIGNMENT_CENTER
+                emptyTextView.setPadding(60, 0, 60, 60)
+                cardContainer.addView(emptyTextView)
+            } else {
+                filteredMatches.forEach { match ->
+                    val matchContainer = LinearLayout(context)
+                    matchContainer.orientation = LinearLayout.VERTICAL
 
-                var isMatchTile = true
-                var currentView: View? = null
+                    var isMatchTile = true
+                    var currentView: View? = null
 
-                fun toggleViews() {
-                    isMatchTile = !isMatchTile
-                    matchContainer.removeAllViews()
-                    currentView = if (isMatchTile) {
-                        createMatchTileView(match)
-                    } else {
-                        createTileView(match)
+                    fun toggleViews() {
+                        isMatchTile = !isMatchTile
+                        matchContainer.removeAllViews()
+                        currentView = if (isMatchTile) {
+                            createMatchTileView(match, userID)
+                        } else {
+                            createTileView(match)
+                        }
+                        matchContainer.addView(currentView)
+
+                        currentView?.setOnClickListener {
+                            toggleViews()
+                        }
                     }
-                    matchContainer.addView(currentView)
+
+                    toggleViews()
 
                     currentView?.setOnClickListener {
                         toggleViews()
                     }
+
+                    cardContainer.addView(matchContainer)
                 }
-
-                toggleViews()
-
-                currentView?.setOnClickListener {
-                    toggleViews()
-                }
-
-                cardContainer.addView(matchContainer)
             }
         }
-
         return cardLayout
     }
 
-    private fun createMatchTileView(match: Match): View {
+
+    private fun createMatchTileView(match: Match, userID: String?): View {
         val inflater = LayoutInflater.from(context)
         val matchTileContent = inflater.inflate(R.layout.match_tile, null)
         val tileTitleTextView = matchTileContent.findViewById<TextView>(R.id.text_tile_title)
@@ -75,19 +117,31 @@ class ShowMatchesBuilder(private val context: Context, private val db: FirebaseF
         val playerA2TextView = matchTileContent.findViewById<TextView>(R.id.text_player_a_2)
         val playerB1TextView = matchTileContent.findViewById<TextView>(R.id.text_player_b_1)
         val playerB2TextView = matchTileContent.findViewById<TextView>(R.id.text_player_b_2)
+        val playerA1InitialsTextView = matchTileContent.findViewById<TextView>(R.id.text_icon_a_1)
+        val playerA2InitialsTextView = matchTileContent.findViewById<TextView>(R.id.text_icon_a_2)
+        val playerB1InitialsTextView = matchTileContent.findViewById<TextView>(R.id.text_icon_b_1)
+        val playerB2InitialsTextView = matchTileContent.findViewById<TextView>(R.id.text_icon_b_2)
+
+        setPlayerClickListener(playerA1TextView, playerA1InitialsTextView, "team_a_1", match, userID)
+        setPlayerClickListener(playerA2TextView, playerA2InitialsTextView, "team_a_2", match, userID)
+        setPlayerClickListener(playerB1TextView, playerB1InitialsTextView, "team_b_1", match, userID)
+        setPlayerClickListener(playerB2TextView, playerB2InitialsTextView, "team_b_2", match, userID)
 
         fetchCourtAndUserDetails(match) { courtName, teamAPlayer1Name, teamAPlayer2Name, teamBPlayer1Name, teamBPlayer2Name ->
-            // Use the court and player details as needed
             tileTitleTextView.text = courtName
             playerA1TextView.text = teamAPlayer1Name
             playerA2TextView.text = teamAPlayer2Name
             playerB1TextView.text = teamBPlayer1Name
             playerB2TextView.text = teamBPlayer2Name
 
+            playerA1InitialsTextView.text = getInitials(teamAPlayer1Name)
+            playerA2InitialsTextView.text = getInitials(teamAPlayer2Name)
+            playerB1InitialsTextView.text = getInitials(teamBPlayer1Name)
+            playerB2InitialsTextView.text = getInitials(teamBPlayer2Name)
+
             fetchDateTime(match.reservationID) { dateTime ->
                 val formattedDateTime = formatDateTime(dateTime)
                 if (formattedDateTime.isNotEmpty()) {
-                    // Set the formatted date and time into the appropriate TextView
                     tileTimeTextView.text = formattedDateTime
                 }
             }
@@ -97,11 +151,101 @@ class ShowMatchesBuilder(private val context: Context, private val db: FirebaseF
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
-        layoutParams.setMargins(30, 30, 30, 30) // Adjust margin values as needed
+        layoutParams.setMargins(MARGIN_VALUE, MARGIN_VALUE, MARGIN_VALUE, MARGIN_VALUE)
         matchTileContent.layoutParams = layoutParams
 
         return matchTileContent
     }
+
+    private fun setPlayerClickListener(
+        textView: TextView,
+        initialsTextView: TextView,
+        fieldName: String,
+        match: Match,
+        userID: String?
+    ) {
+        initialsTextView.setOnClickListener {
+            val teamAPlayer1 = match.teamAPlayer1
+            val teamAPlayer2 = match.teamAPlayer2
+            val teamBPlayer1 = match.teamBPlayer1
+            val teamBPlayer2 = match.teamBPlayer2
+
+            fetchUserName(userID) { userName ->
+                val currentUserName = userName
+
+                val playersList = listOf(teamAPlayer1, teamAPlayer2, teamBPlayer1, teamBPlayer2)
+
+                Log.d("JOINABLE", playersList.toString())
+
+                if (playersList.contains(userID)) {
+                    // User is already in this match
+                    Toast.makeText(
+                        context,
+                        "You've already joined this match.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    // User is not in this match, continue with the code
+                    Log.d("JOINABLE", "CLICKED")
+                    if (textView.text.toString() == "Empty") {
+                        Log.d("JOINABLE", "JOINABLE")
+                        updateFirestore(match.documentID, fieldName, userID)
+                        updateMatch(match, fieldName, userID)
+
+                        textView.text = currentUserName
+                        initialsTextView.text = getInitials(currentUserName)
+
+                        Log.d("UserIDDebug", "UserID: $userID") // Log the userID here
+                    } else {
+                        Log.d("JOINABLE", "NOT JOINABLE")
+                    }
+                }
+            }
+        }
+    }
+
+
+
+    private fun updateFirestore(id: String, fieldToUpdate: String, value: String?) {
+        val matchesCollection = db.collection(FirestoreConstants.COLLECTION_MATCHES)
+        matchesCollection.document(id)
+            .update(fieldToUpdate, value)
+            .addOnFailureListener { exception ->
+                handleFirestoreError("UpdateFirestoreError", exception)
+            }
+    }
+    fun updateMatch(match: Match, fieldName: String, userID: String?) {
+        Log.d("MatchUpdate", "Before update: $match")
+        Log.d("MatchUpdate",fieldName)
+        when (fieldName) {
+            "team_a_1" -> match.teamAPlayer1 = userID ?: ""
+            "team_a_2" -> match.teamAPlayer2 = userID ?: ""
+            "team_b_1" -> match.teamBPlayer1 = userID ?: ""
+            "team_b_2" -> match.teamBPlayer2 = userID ?: ""
+        }
+        Log.d("MatchUpdate", "After update: $match")
+    }
+
+    private fun getInitials(name: String): String {
+        if (name == "Empty"){
+            return "+"
+        }
+        return if (name.isNotEmpty()) {
+            val words = name.split(" ")
+            val initials = StringBuilder()
+
+            for (word in words) {
+                if (word.isNotBlank()) {
+                    initials.append(word[0].uppercaseChar())
+                }
+            }
+
+            initials.toString()
+        } else {
+            ""
+        }
+    }
+
 
     private fun fetchCourtAndUserDetails(
         match: Match,
@@ -227,6 +371,7 @@ class ShowMatchesBuilder(private val context: Context, private val db: FirebaseF
         document: DocumentSnapshot,
         onMatchFetched: (Match) -> Unit
     ) {
+        val documentID = document.id // Get the Firestore document ID
         val reservationID = document.getString("reservationID")
         val teamAPlayer1ID = document.getString("team_a_1")
         val teamAPlayer2ID = document.getString("team_a_2")
@@ -234,6 +379,7 @@ class ShowMatchesBuilder(private val context: Context, private val db: FirebaseF
         val teamBPlayer2ID = document.getString("team_b_2")
 
         val match = Match(
+            documentID = documentID,
             reservationID = reservationID ?: "",
             teamAPlayer1 = teamAPlayer1ID ?: "",
             teamAPlayer2 = teamAPlayer2ID ?: "",
@@ -243,6 +389,7 @@ class ShowMatchesBuilder(private val context: Context, private val db: FirebaseF
 
         onMatchFetched(match)
     }
+
 
     private fun fetchDateTime(reservationID: String, onDateTimeFetched: (String) -> Unit) {
         db.collection("reservations").document(reservationID)
@@ -281,6 +428,11 @@ class ShowMatchesBuilder(private val context: Context, private val db: FirebaseF
             return "$dateString $timeString"
         }
         return ""
+    }
+
+    private fun handleFirestoreError(tag: String, exception: Exception) {
+        Log.e(tag, "Error performing Firestore operation: $exception")
+        // Handle the error globally or as needed
     }
 
 }

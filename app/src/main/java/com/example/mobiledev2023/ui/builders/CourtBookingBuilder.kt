@@ -5,7 +5,14 @@ import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.Button
+import android.widget.DatePicker
+import android.widget.LinearLayout
+import android.widget.Spinner
+import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavOptions
 import androidx.navigation.Navigation.findNavController
@@ -35,6 +42,14 @@ class CourtBookingBuilder(private val context: Context, private val db: Firebase
         cardContainer = cardLayout.findViewById(R.id.card_container)
         val titleTextView = cardContainer.findViewById<TextView>(R.id.text_card)
         titleTextView.text = title
+
+
+        val layoutParamsCard = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        layoutParamsCard.setMargins(0, 30, 0, 0)
+        cardLayout.layoutParams = layoutParamsCard
 
         courtSpinner = Spinner(context)
         datePicker = DatePicker(context)
@@ -204,7 +219,13 @@ class CourtBookingBuilder(private val context: Context, private val db: Firebase
         val newBookButton = Button(context)
         newBookButton.text = "Book"
         newBookButton.tag = "bookButton"
-
+        newBookButton.setBackgroundResource(R.drawable.rounded_bg3)
+        val buttonParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.MATCH_PARENT
+        )
+        buttonParams.setMargins(30, 30, 30, 30)
+        newBookButton.layoutParams = buttonParams
         newBookButton.setOnClickListener {
             if (selectedTime.isEmpty()) {
                 Toast.makeText(context, "Please select a time slot", Toast.LENGTH_SHORT).show()
@@ -214,7 +235,7 @@ class CourtBookingBuilder(private val context: Context, private val db: Firebase
                 bookSelectedTimeSlot(userID ,selectedCourt, selectedDate, selectedTime)
 
                 val navOptions = NavOptions.Builder()
-                    .setPopUpTo(R.id.navigation_court, true) // This will clear the back stack up to home
+                    .setPopUpTo(R.id.navigation_court, true)
                     .build()
                 // Trigger navigation to the DashboardFragment
                 findNavController(fragmentView).navigate(R.id.action_court_to_match, null, navOptions)

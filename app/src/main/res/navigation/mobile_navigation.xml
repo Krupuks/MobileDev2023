@@ -35,6 +35,11 @@
         app:destination="@id/navigation_court" />
     />
 
+    <action
+        android:id="@+id/action_match_to_explore"
+        app:destination="@id/navigation_explore" />
+    />
+
     <fragment
         android:id="@+id/navigation_profile"
         android:name="com.example.mobiledev2023.ui.profile.ProfileFragment"
